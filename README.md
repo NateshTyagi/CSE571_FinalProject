@@ -11,15 +11,18 @@ We have done a comparative study between BFS, DFS, A*, UCS, MM and MM0 search al
 ## How to run
 * Open a terminal
 * Clone this repository using : 
-*     git clone https://github.com/NateshTyagi/CSE571_FinalProject.git
+
+        git clone https://github.com/NateshTyagi/CSE571_FinalProject.git
 * Navigate to the folder : _CSE571_FinalProject_
 * Run the executable file on your terminal using the command: 
-*     ./complexityTest.sh  Argument1 Argument2 Argument3
+
+        ./complexityTest.sh  Argument1 Argument2 Argument3
   - Argument1 : {tiny, medium, big}
   - Argument2 : {0, 30, 50}
   - Argument3: {bfs, dfs, ucs, astar, MM, MM0}
 
 * Addtionally, to run on smallMaze, contoursMaze, openMaze:
-*     python3 pacman.py -l {Argument1} -z .5 -p SearchAgent -a fn={Argument2},heuristic=manhattanHeuristic
+
+        python3 pacman.py -l {Argument1} -z .5 -p SearchAgent -a fn={Argument2},heuristic=manhattanHeuristic
   - Argument1 : {smallMaze, contoursMaze, openMaze}
   - Argument3: {bfs, dfs, ucs, astar, MM, MM0}
