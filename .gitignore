@@ -1,0 +1,11 @@
+.idea
+**/.DS_Store
+.cache
+*.egg-info
+**/data
+#**/experiments
+**/__pycache__
+**/.ipynb_checkpoints
+
+build
+dist
