@@ -6,17 +6,20 @@ We implement Bi-directional search for path finding problems using MM and MM0 al
 We have done a comparative study between BFS, DFS, A*, UCS, MM and MM0 search algorithms. We tested the algorithms in different Pac-Man maze layouts which ranged in size, complexity of the layout (the number of walls) and different start-goal position pairs.
 
 ## Dependencies
-Python 3.6
+    Python 3.6
 
 ## How to run
 * Open a terminal
-* Clone this repository using : _git clone https://github.com/NateshTyagi/CSE571_FinalProject.git_
+* Clone this repository using : 
+*     git clone https://github.com/NateshTyagi/CSE571_FinalProject.git
 * Navigate to the folder : _CSE571_FinalProject_
-* Run the executable file on your terminal using the command: _./complexityTest.sh_  Argument1 Argument2 Argument3
-1) Argument1 : {tiny, medium, big}
-2) Argument2 : {0, 30, 50}
-3) Argument3: {bfs, dfs, ucs, astar, MM, MM0}
+* Run the executable file on your terminal using the command: 
+*     ./complexityTest.sh  Argument1 Argument2 Argument3
+  - Argument1 : {tiny, medium, big}
+  - Argument2 : {0, 30, 50}
+  - Argument3: {bfs, dfs, ucs, astar, MM, MM0}
 
-* Addtionally, to run on smallMaze, contoursMaze, openMaze: _python3 pacman.py -l {Argument1} -z .5 -p SearchAgent -a fn={Argument2},heuristic=manhattanHeuristic_
-1) Argument1 : {smallMaze, contoursMaze, openMaze}
-2) Argument3: {bfs, dfs, ucs, astar, MM, MM0}
+* Addtionally, to run on smallMaze, contoursMaze, openMaze:
+*     python3 pacman.py -l {Argument1} -z .5 -p SearchAgent -a fn={Argument2},heuristic=manhattanHeuristic
+  - Argument1 : {smallMaze, contoursMaze, openMaze}
+  - Argument3: {bfs, dfs, ucs, astar, MM, MM0}
