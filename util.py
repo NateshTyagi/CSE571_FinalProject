@@ -704,7 +704,6 @@ import sys
 import inspect
 import heapq, random
 
-
 class FixedRandom:
     def __init__(self):
         fixedState = (3, (2147483648, 507801126, 683453281, 310439348, 2597246090, \
@@ -911,6 +910,7 @@ class PriorityQueueWithFunction(PriorityQueue):
 def manhattanDistance( xy1, xy2 ):
     "Returns the Manhattan distance between points xy1 and xy2"
     return abs( xy1[0] - xy2[0] ) + abs( xy1[1] - xy2[1] )
+
 
 """
   Data structures and functions useful for various course projects

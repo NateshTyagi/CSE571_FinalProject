@@ -488,29 +488,18 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     path_queue.push(path_from_root + [successor[1]], f)
         path_from_root = path_queue.pop()
 
+class bidirectional_search:
+    def __init__(self):
+        self.gF = 0
+        self.gB = 0
+        self.openF = util.PriorityQueue()
+        self.openB = util.PriorityQueue()
+
 
 def MM0(problem):
-    def PathReverse(p):
-        """
-        Given a action list, return the reversed version of it for the nodes expanding in the backward direction.
-        """
-        path = []
-        for x in p:
-            if x == 'North':
-                z = 'South'
-                path.append(z)
-            if x == 'South':
-                z = 'North'
-                path.append(z)
-            if x == 'West':
-                z = 'East'
-                path.append(z)
-            if x == 'East':
-                z = 'West'
-                path.append(z)
-        return path[::-1]
+    from game import Directions
 
-    gF = 0  # initialize gF value to be 0 as the cost of returning to the start state from the start node is zero
+    gF = 0
 
     gB = 0
     OpenF = util.PriorityQueue()  # create a Priority Queue to store all the nodes expanded in the forward direction
@@ -542,15 +531,15 @@ def MM0(problem):
 
         if StateF == StateB:
             print('reached goal1')
-            return pathF + PathReverse(pathB)
+            return pathF + Directions.get_reverse_path(pathB)
         if StateF in ClosedB:
             pathB = ClosedB[StateF]
             print('reached goal2')
-            return pathF + PathReverse(pathB)
+            return pathF + Directions.get_reverse_path(pathB)
         if StateB in ClosedF:
             pathF = ClosedF[StateB]
             print('reached goal3')
-            return pathF + PathReverse(pathB)
+            return pathF + Directions.get_reverse_path(pathB)
 
         if (
                 C == gF):  # If the cost of expanding a node in the forward iteration is lesser, then expand node in forward direction
@@ -591,29 +580,11 @@ def MM0(problem):
 
 
 def MM(problem, heuristic=nullHeuristic):
-    def PathReverse(p):
-        """
-        Given a action list, return the reversed version of it for the nodes expanded in the backward direction.
-        """
-        path = []
-        for x in p:
-            if x == 'North':
-                z = 'South'
-                path.append(z)
-            if x == 'South':
-                z = 'North'
-                path.append(z)
-            if x == 'West':
-                z = 'East'
-                path.append(z)
-            if x == 'East':
-                z = 'West'
-                path.append(z)
-        return path[::-1]
-
+    from game import Directions
+    #initializing variables
     gF = 0
-    epsilon = 1
     gB = 0
+    epsilon = 1
     OpenF = util.PriorityQueue()
     OpenB = util.PriorityQueue()
     hf = heuristic(problem.getStartState(), problem)
@@ -644,15 +615,15 @@ def MM(problem, heuristic=nullHeuristic):
 
         if StateF == StateB:  # check if the current nodes of forward and backward are meeting
             print('reached goal1')
-            return pathF + PathReverse(pathB)
+            return pathF + (pathB)
         if StateF in ClosedB:  # check if the node to be expanded is alredy present in the array which stores the node expanded by the backward search
             pathB = ClosedB[StateF]
             print('reached goal2')
-            return pathF + PathReverse(pathB)
+            return pathF + Directions.get_reverse_path(pathB)
         if StateB in ClosedF:  # check if the node to be expanded is already present in the ClosedF(forward) array
             pathF = ClosedF[StateB]
             print('reached goal3')
-            return pathF + PathReverse(pathB)
+            return pathF + Directions.get_reverse_path(pathB)
 
         if (
                 C == gF):  # If the cost of expanding a node in the forward iteration is lesser, then expand node in forward direction

@@ -67,6 +67,15 @@ class Directions:
                WEST: EAST,
                STOP: STOP}
 
+    def get_reverse_path(path):
+        """
+        Given a action list, return the reversed version of it for the nodes expanded in the backward direction.
+        """
+        reverse_path = []
+        for action in path:
+            reverse_path.append(Directions.REVERSE[action])
+        return reverse_path[::-1]
+
 class Configuration:
     """
     A Configuration holds the (x,y) coordinate of a character, along with its
