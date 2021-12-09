@@ -17,12 +17,12 @@ We have done a comparative study between BFS, DFS, A*, UCS, MM and MM0 search al
 * Run the executable file on your terminal using the command: 
 
         ./complexityTest.sh  Argument1 Argument2 Argument3
-  - Argument1 : {tiny, medium, big}
-  - Argument2 : {0, 30, 50}
-  - Argument3: {bfs, dfs, ucs, astar, MM, MM0}
+  - Argument1(maze) : {tiny, medium, big}
+  - Argument2(complexity) : {0, 30, 50}
+  - Argument3(algorithm): {bfs, dfs, ucs, astar, MM, MM0}
 
 * Addtionally, to run on smallMaze, contoursMaze, openMaze:
 
         python3 pacman.py -l {Argument1} -z .5 -p SearchAgent -a fn={Argument2},heuristic=manhattanHeuristic
-  - Argument1 : {smallMaze, contoursMaze, openMaze}
-  - Argument3: {bfs, dfs, ucs, astar, MM, MM0}
+  - Argument1(maze) : {smallMaze, contoursMaze, openMaze}
+  - Argument2(algorithm): {bfs, dfs, ucs, astar, MM, MM0}
