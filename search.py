@@ -488,184 +488,210 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     path_queue.push(path_from_root + [successor[1]], f)
         path_from_root = path_queue.pop()
 
+
 class bidirectional_search:
     def __init__(self):
-        self.gF = 0
-        self.gB = 0
+        self.gF = {}
+        self.gB = {}
+        self.hF = {}
+        self.hB = {}
         self.openF = util.PriorityQueue()
         self.openB = util.PriorityQueue()
+        self.closedF = {}
+        self.closedB = {}
+
+    def fF(self, node):
+        return self.gF[node] + self.hF[node]
+
+    def fB(self, node):
+        return self.gB[node] + self.hB[node]
+
+    def get_min_priorityF(self, node):
+        return min(self.fF(node), 2 * self.gF[node])
+
+    def get_max_priorityF(self, node):
+        return max(self.fF(node), 2 * self.gF[node])
+
+    def get_min_priorityB(self, node):
+        return min(self.fB(node), 2 * self.gB[node])
+
+    def get_max_priorityB(self, node):
+        return max(self.fB(node), 2 * self.gB[node])
+
+    def isGoalReached(self, posF, posB):
+        if posF == posB:
+            return True, "meet_in_mid"
+        elif posF in self.closedB:
+            return True, "inB"
+        elif posB in self.closedF:  # check if the node to be expanded is already present in the ClosedF(forward) array
+            return True, "inF"
+        else:
+            return False, ""
 
 
-def MM0(problem):
+def MM0(problem, heuristic=nullHeuristic):
+    #Since in MM0 h(n) = 0
+    heuristic = nullHeuristic
+
     from game import Directions
 
-    gF = 0
+    forward_node = problem.getStartState()
+    backward_node = problem.goal
 
-    gB = 0
-    OpenF = util.PriorityQueue()  # create a Priority Queue to store all the nodes expanded in the forward direction
-    OpenB = util.PriorityQueue()  # craete a Priority Queue to store all the nodes expanded in the backward direction
-    OpenF.push((problem.getStartState(), [], 0),
-               2 * gF)  # push the start state to the Queue.Since the heuristic value is zero we take into account the the value of max(g,2*g) = 2*g
-    OpenB.push((problem.goal, [], 0), 2 * gB)  # push the goal state to the Queue
+    bds = bidirectional_search()
 
-    ClosedF = {}  # dictionary to store the path to reach the node from start node, with the key being its location
-    ClosedB = {}  # dictionary to store the path to reach the node from goal node, with the key being its location
-    gF_dic = {}  # dictionary to store the cost to reach the node from start node, with the key being its location
-    gB_dic = {}  # dictionary to store the cost to reach the node from goal node, with the key being its location
-    gF_dic[problem.getStartState()] = gF
-    gB_dic[problem.goal] = gB
-    U = float('inf')
+    bds.gF[forward_node] = 0
+    bds.gB[backward_node] = 0
 
-    while (not OpenF.isEmpty()) and (not OpenB.isEmpty()):
+    bds.hF[forward_node] = heuristic(forward_node, problem)
+    bds.hB[backward_node] = heuristic(backward_node, problem)
 
-        CurrentPopF = OpenF.pop()
-        CurrentPopB = OpenB.pop()
-        StateF = CurrentPopF[0]
-        StateB = CurrentPopB[0]
-        gF = CurrentPopF[2]
-        gB = CurrentPopB[2]
-        pathF = CurrentPopF[1]
-        pathB = CurrentPopB[1]
+    bds.openF.push((forward_node, [], bds.get_max_priorityF(forward_node)), bds.get_max_priorityF(forward_node))
+    bds.openB.push((backward_node, [], bds.get_max_priorityB(backward_node)), bds.get_max_priorityB(backward_node))
 
-        C = min(gF, gB)  # find the minimum cost value (i.e from the forward node and backward node)
+    while not bds.openF.isEmpty() and not bds.openB.isEmpty():
 
-        if StateF == StateB:
-            print('reached goal1')
-            return pathF + Directions.get_reverse_path(pathB)
-        if StateF in ClosedB:
-            pathB = ClosedB[StateF]
-            print('reached goal2')
-            return pathF + Directions.get_reverse_path(pathB)
-        if StateB in ClosedF:
-            pathF = ClosedF[StateB]
-            print('reached goal3')
-            return pathF + Directions.get_reverse_path(pathB)
+        forward_node = bds.openF.pop()
+        backward_node = bds.openB.pop()
 
-        if (
-                C == gF):  # If the cost of expanding a node in the forward iteration is lesser, then expand node in forward direction
-            OpenB.push(CurrentPopB, 2 * gB)  # Push back the popped node of backward iteration in the queue
-            ClosedF[CurrentPopF[
-                0]] = pathF  # store the popped node's path in dictionary closedF with key as the node's location
-            SuccessorsF = problem.getSuccessors(StateF)
-            for i in SuccessorsF:
-                if OpenF.isthere(i[0]) or i[
-                    0] in ClosedF:  # check if successor is already present in OpenF or in ClosedF(i.e. already visited nodes)
-                    if gF_dic[i[0]] < gF + i[
-                        2]:  # If yes, check if this node's stored cost is less than sum of cost to current node + cost of edge to the successor node
+        posF = forward_node[0]
+        posB = backward_node[0]
+
+        pathF = forward_node[1]
+        pathB = backward_node[1]
+
+        prminF = forward_node[2]
+        prminB = backward_node[2]
+
+        C = min(prminF, prminB)
+
+        goal_reached, goal_condition = bds.isGoalReached(posF, posB)
+
+        if goal_reached:
+            if goal_condition == "meet_in_mid":
+                return pathF + Directions.get_reverse_path(pathB)
+            elif goal_condition == "inB":
+                pathB = bds.closedB[posF]
+                return pathF + Directions.get_reverse_path(pathB)
+            elif goal_condition == "inF":
+                pathF = bds.closedF[posB]
+                return pathF + Directions.get_reverse_path(pathB)
+
+        if (C == prminF):
+            bds.openB.push(backward_node, prminB)
+            bds.closedF[posF] = pathF
+            successorsF = problem.getSuccessors(posF)
+            for next_state, action, cost in successorsF:
+                if bds.openF.isthere(next_state) or next_state in bds.closedF:
+                    if bds.gF[next_state] <= bds.gF[posF] + cost:
                         continue
-                    if OpenF.isthere(i[0]):
-                        OpenF.remove_by_value(i[
-                                                  0])  # Remove node from OpenF queue if the successor node is present there. Check function in util.py.
-                    elif i[0] in ClosedF:
-                        del ClosedF[i[0]]  # remove node from ClosedF if the successor node is present there
-                gF_dic[i[0]] = gF + i[2]  # update the cost to reach the succesor node and then push it to the queue
-                OpenF.push((i[0], pathF + [i[1]], gF + i[2]), 2 * (gF + i[2]))
+                    if bds.openF.isthere(next_state):
+                        bds.openF.remove_by_value(next_state)
+                    elif next_state in bds.closedF:
+                        del bds.closedF[next_state]
+                bds.gF[next_state] = bds.gF[posF] + cost
+                bds.hF[next_state] = heuristic(next_state, problem)
+                bds.openF.push((next_state, pathF + [action], bds.get_max_priorityF(next_state)),
+                               bds.get_max_priorityF(next_state))
 
         else:
-            OpenF.push(CurrentPopF, 2 * gF)
-            ClosedB[CurrentPopB[0]] = pathB
-            SuccessorsB = problem.getSuccessors(StateB)
-            for i in SuccessorsB:
-                if OpenB.isthere(i[0]) or i[0] in ClosedB:
-                    if gB_dic[i[0]] < gB + i[2]:
+            bds.openF.push(forward_node, prminF)
+            bds.closedB[posB] = pathB
+            successorsB = problem.getSuccessors(posB)
+            for next_state, action, cost in successorsB:
+                if bds.openB.isthere(next_state) or next_state in bds.closedB:
+                    if bds.gB[next_state] <= bds.gB[posB] + cost:
                         continue
-                    if OpenB.isthere(i[0]):
-                        OpenB.remove_by_value(i[0])
-                    elif i[0] in ClosedB:
-                        del ClosedB[i[0]]
-                gB_dic[i[0]] = gB + i[2]
-                OpenB.push((i[0], pathB + [i[1]], gB + i[2]), 2 * (gB + i[2]))
+                    if bds.openB.isthere(next_state):
+                        bds.openB.remove_by_value(next_state)
+                    elif next_state in bds.closedB:
+                        del bds.closedB[next_state]
+                bds.gB[next_state] = bds.gB[posB] + cost
+                bds.hB[next_state] = heuristic(next_state, problem)
+                bds.openB.push((next_state, pathB + [action], bds.get_max_priorityB(next_state)),
+                               bds.get_max_priorityB(next_state))
 
     return []
 
 
 def MM(problem, heuristic=nullHeuristic):
     from game import Directions
-    #initializing variables
-    gF = 0
-    gB = 0
-    epsilon = 1
-    OpenF = util.PriorityQueue()
-    OpenB = util.PriorityQueue()
-    hf = heuristic(problem.getStartState(), problem)
-    hb = heuristic(problem.goal, problem)
-    OpenF.push((problem.getStartState(), [], 0), max(hf, 2 * gF))
-    OpenB.push((problem.goal, [], 0), max(hb, 2 * gB))
 
-    ClosedF = {}  # dictionary to store the path to reach the node from start node, with the key being its location
-    ClosedB = {}  # dictionary to store the cost to reach the node from goal node, with the key being its location
-    gF_dic = {}  # dictionary to store the cost to reach the node from start node, with the key being its location
-    gB_dic = {}  # dictionary to store the cost to reach the node from goal node, with the key being its location
-    gF_dic[problem.getStartState()] = gF
-    gB_dic[problem.goal] = gB
+    forward_node = problem.getStartState()
+    backward_node = problem.goal
 
-    while (not OpenF.isEmpty()) and (not OpenB.isEmpty()):
+    bds = bidirectional_search()
 
-        CurrentPopF = OpenF.pop()
-        CurrentPopB = OpenB.pop()
-        StateF = CurrentPopF[0]
-        StateB = CurrentPopB[0]
-        gF = CurrentPopF[2]
-        gB = CurrentPopB[2]
-        pathF = CurrentPopF[1]
-        pathB = CurrentPopB[1]
+    bds.gF[forward_node] = 0
+    bds.gB[backward_node] = 0
 
-        C = min(gF,
-                gB)  # check expnding which node is less costlier, i.e. node in the forward direction or the node in backward direction.
+    bds.hF[forward_node] = heuristic(forward_node, problem)
+    bds.hB[backward_node] = heuristic(backward_node, problem)
 
-        if StateF == StateB:  # check if the current nodes of forward and backward are meeting
-            print('reached goal1')
-            return pathF + (pathB)
-        if StateF in ClosedB:  # check if the node to be expanded is alredy present in the array which stores the node expanded by the backward search
-            pathB = ClosedB[StateF]
-            print('reached goal2')
-            return pathF + Directions.get_reverse_path(pathB)
-        if StateB in ClosedF:  # check if the node to be expanded is already present in the ClosedF(forward) array
-            pathF = ClosedF[StateB]
-            print('reached goal3')
-            return pathF + Directions.get_reverse_path(pathB)
+    bds.openF.push((forward_node, [], bds.get_max_priorityF(forward_node)), bds.get_max_priorityF(forward_node))
+    bds.openB.push((backward_node, [], bds.get_max_priorityB(backward_node)), bds.get_max_priorityB(backward_node))
 
-        if (
-                C == gF):  # If the cost of expanding a node in the forward iteration is lesser, then expand node in forward direction
-            OpenB.push(CurrentPopB, gB)  # Push back the popped node of backward iteration in the queue
-            ClosedF[CurrentPopF[
-                0]] = pathF  # store the popped node's path in dictionary closedF with key as the node's location
-            SuccessorsF = problem.getSuccessors(StateF)
-            for i in SuccessorsF:
-                h_f = heuristic(i[0], problem)
-                if OpenF.isthere(i[0]) or i[
-                    0] in ClosedF:  # check if successor is already present in OpenF or in ClosedF(i.e. already visited nodes)
-                    if gF_dic[i[0]] < gF + i[
-                        2]:  # If yes, check if this node's stored cost is less than sum of cost to current node + cost of edge to the successor node
+    while not bds.openF.isEmpty() and not bds.openB.isEmpty():
+
+        forward_node = bds.openF.pop()
+        backward_node = bds.openB.pop()
+
+        posF = forward_node[0]
+        posB = backward_node[0]
+
+        pathF = forward_node[1]
+        pathB = backward_node[1]
+
+        prminF = forward_node[2]
+        prminB = backward_node[2]
+
+        C = min(prminF, prminB)
+
+        goal_reached, goal_condition = bds.isGoalReached(posF, posB)
+
+        if goal_reached:
+            if goal_condition == "meet_in_mid":
+                return pathF + Directions.get_reverse_path(pathB)
+            elif goal_condition == "inB":
+                pathB = bds.closedB[posF]
+                return pathF + Directions.get_reverse_path(pathB)
+            elif goal_condition == "inF":
+                pathF = bds.closedF[posB]
+                return pathF + Directions.get_reverse_path(pathB)
+
+        if (C == prminF):
+            bds.openB.push(backward_node, prminB)
+            bds.closedF[posF] = pathF
+            successorsF = problem.getSuccessors(posF)
+            for next_state, action, cost in successorsF:
+                if bds.openF.isthere(next_state) or next_state in bds.closedF:
+                    if bds.gF[next_state] <= bds.gF[posF] + cost:
                         continue
-                    if OpenF.isthere(i[0]):
-                        OpenF.remove_by_value(i[
-                                                  0])  # Remove node from OpenF queue if the successor node is present there. Check function in util.py.
-                    elif i[0] in ClosedF:
-                        del ClosedF[i[0]]  # remove node from ClosedF if the successor node is present there
-                gF_dic[i[0]] = gF + i[2]  # update the cost to reach the succesor node and then push it to the queue
-                ff = h_f + gF + i[2]  # f(x) = g(x) + h(x)
-                OpenF.push((i[0], pathF + [i[1]], max(ff, 2 * (gF + i[2]))), max(ff, 2 * (
-                        gF + i[2])))  # choose the cost value which satisfies max(f(x),2*g(x)) as the priority value
+                    if bds.openF.isthere(next_state):
+                        bds.openF.remove_by_value(next_state)
+                    elif next_state in bds.closedF:
+                        del bds.closedF[next_state]
+                bds.gF[next_state] = bds.gF[posF] + cost
+                bds.hF[next_state] = heuristic(next_state, problem)
+                bds.openF.push((next_state, pathF + [action], bds.get_max_priorityF(next_state)),
+                               bds.get_max_priorityF(next_state))
 
-                # if OpenB.isthere(i[0]):
-                #     U = min(U, gF_dic[i[0]] + gB_dic[1[0]])
         else:
-            OpenF.push(CurrentPopF, gF)
-            ClosedB[CurrentPopB[0]] = pathB
-            SuccessorsB = problem.getSuccessors(StateB)
-            for i in SuccessorsB:
-                h_b = heuristic(i[0], problem)
-                if OpenB.isthere(i[0]) or i[0] in ClosedB:
-                    if gB_dic[i[0]] < gB + i[2]:
+            bds.openF.push(forward_node, prminF)
+            bds.closedB[posB] = pathB
+            successorsB = problem.getSuccessors(posB)
+            for next_state, action, cost in successorsB:
+                if bds.openB.isthere(next_state) or next_state in bds.closedB:
+                    if bds.gB[next_state] <= bds.gB[posB] + cost:
                         continue
-                    if OpenB.isthere(i[0]):
-                        OpenB.remove_by_value(i[0])
-                    elif i[0] in ClosedB:
-                        del ClosedB[i[0]]
-                gB_dic[i[0]] = gB + i[2]
-                fb = h_b + gB + i[2]
-                OpenB.push((i[0], pathB + [i[1]], max(fb, 2 * (gB + i[2]))), max(fb, 2 * (gB + i[2])))
+                    if bds.openB.isthere(next_state):
+                        bds.openB.remove_by_value(next_state)
+                    elif next_state in bds.closedB:
+                        del bds.closedB[next_state]
+                bds.gB[next_state] = bds.gB[posB] + cost
+                bds.hB[next_state] = heuristic(next_state, problem)
+                bds.openB.push((next_state, pathB + [action], bds.get_max_priorityB(next_state)),
+                               bds.get_max_priorityB(next_state))
 
     return []
 
@@ -675,5 +701,5 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
-bd0 = MM0
-bd = MM
+MM0 = MM0
+MM = MM

@@ -173,12 +173,9 @@ class PositionSearchProblem(search.SearchProblem):
     def getStartState(self):
         return self.startState
 
-    def isGoalState(self, state, other_visited=None):
-        if other_visited is None:
-            isGoal = state == self.goal
-        else:
-            # This bidirectional check simply checks if the given state has been reached by the other (hence meeting in the middle)
-            isGoal = state in other_visited
+    def isGoalState(self, state):
+
+        isGoal = state == self.goal
 
         # For display purposes only
         if isGoal and self.visualize:
